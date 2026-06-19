@@ -10,3 +10,5 @@ exports.login = async (req, res) => {
   // basic login
   res.json({ message: 'Logged in' });
 };
+
+exports.googleLogin = async (req, res) => { res.json({ message: 'Google OAuth via BetterAuth mock' }); };
