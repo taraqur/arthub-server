@@ -5,6 +5,7 @@ import { isAuthenticated } from '../middlewares/auth.middleware.js';
 
 router.post('/create-checkout-session', isAuthenticated, controller.createCheckoutSession);
 router.post('/subscription/checkout', isAuthenticated, controller.createSubscriptionCheckout);
+router.post('/create-portal-session', isAuthenticated, controller.createPortalSession);
 router.post('/verify-session', controller.verifySession);
 
 export default router;
