@@ -42,8 +42,8 @@ export const createCheckoutSession = async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.CLIENT_URL}/dashboard/user/purchases?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL}/artwork/${artworkId}?canceled=true`,
+            success_url: `${process.env.CLIENT_URL || req.headers.origin || 'http://localhost:3000'}/dashboard/user/purchases?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL || req.headers.origin || 'http://localhost:3000'}/artwork/${artworkId}?canceled=true`,
             metadata: {
                 type: 'purchase',
                 userId: userId.toString(),
@@ -109,8 +109,8 @@ export const createSubscriptionCheckout = async (req, res) => {
                 },
             ],
             mode: 'subscription',
-            success_url: `${process.env.CLIENT_URL}/dashboard/user/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL}/dashboard/user/subscription?canceled=true`,
+            success_url: `${process.env.CLIENT_URL || req.headers.origin || 'http://localhost:3000'}/dashboard/user/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL || req.headers.origin || 'http://localhost:3000'}/dashboard/user/subscription?canceled=true`,
             metadata: {
                 type: 'subscription',
                 userId: userId.toString(),
@@ -147,7 +147,7 @@ export const createPortalSession = async (req, res) => {
 
         const portalSession = await stripe.billingPortal.sessions.create({
             customer: user.stripeCustomerId,
-            return_url: `${process.env.CLIENT_URL}/dashboard/user/subscription`,
+            return_url: `${process.env.CLIENT_URL || req.headers.origin || 'http://localhost:3000'}/dashboard/user/subscription`,
         });
 
         res.json({ url: portalSession.url });

@@ -1,9 +1,14 @@
 import { getDb } from '../config/db.js';
+import { ObjectId } from 'mongodb';
 
 export const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await getDb().collection('user').findOne({ id: userId });
+        let userQuery = [{ id: userId }, { _id: userId }];
+        if (ObjectId.isValid(userId)) {
+            userQuery.push({ _id: new ObjectId(userId) });
+        }
+        const user = await getDb().collection('user').findOne({ $or: userQuery });
         
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -27,8 +32,13 @@ export const updateProfile = async (req, res) => {
         if (name) updateData.name = name;
         if (image) updateData.image = image;
 
+        let userQuery = [{ id: userId }, { _id: userId }];
+        if (ObjectId.isValid(userId)) {
+            userQuery.push({ _id: new ObjectId(userId) });
+        }
+
         await getDb().collection('user').updateOne(
-            { id: userId },
+            { $or: userQuery },
             { $set: updateData }
         );
         
@@ -44,8 +54,13 @@ export const upgradeSubscription = async (req, res) => {
         const userId = req.user.id;
         const { tier } = req.body; // 'free', 'pro', 'premium'
         
+        let userQuery = [{ id: userId }, { _id: userId }];
+        if (ObjectId.isValid(userId)) {
+            userQuery.push({ _id: new ObjectId(userId) });
+        }
+
         await getDb().collection('user').updateOne(
-            { id: userId },
+            { $or: userQuery },
             { $set: { subscriptionTier: tier } }
         );
         

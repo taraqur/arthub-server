@@ -12,4 +12,8 @@ router.post('/', isArtist, controller.createArtwork);
 router.patch('/:id', isArtist, controller.updateArtwork);
 router.delete('/:id', isArtist, controller.deleteArtwork);
 
+import * as commentController from '../controllers/comment.controller.js';
+import { isAuthenticated } from '../middlewares/auth.middleware.js';
+router.post('/:id/comments', isAuthenticated, commentController.createComment);
+
 export default router;

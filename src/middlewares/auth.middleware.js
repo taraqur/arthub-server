@@ -1,9 +1,10 @@
 import { auth } from '../lib/auth.js';
+import { fromNodeHeaders } from 'better-auth/node';
 
 export const isAuthenticated = async (req, res, next) => {
     try {
         const session = await auth.api.getSession({
-            headers: req.headers
+            headers: fromNodeHeaders(req.headers)
         });
         
         if (!session || !session.user) {
@@ -21,7 +22,7 @@ export const isAuthenticated = async (req, res, next) => {
 export const isArtist = async (req, res, next) => {
     try {
         const session = await auth.api.getSession({
-            headers: req.headers
+            headers: fromNodeHeaders(req.headers)
         });
         
         if (!session || !session.user) {
@@ -43,7 +44,7 @@ export const isArtist = async (req, res, next) => {
 export const isAdmin = async (req, res, next) => {
     try {
         const session = await auth.api.getSession({
-            headers: req.headers
+            headers: fromNodeHeaders(req.headers)
         });
         
         if (!session || !session.user) {

@@ -15,11 +15,61 @@ export const getStats = async (req, res, next) => {
         
         const totalRevenue = revenueAggregation.length > 0 ? revenueAggregation[0].total : 0;
 
+        // Generate categoryData
+        const categoryAggregation = await getDb().collection('artworks').aggregate([
+            { $group: { _id: "$category", count: { $sum: 1 } } }
+        ]).toArray();
+        
+        const colors = {
+            "Digital Art": "#8b5cf6",
+            "Photography": "#ec4899",
+            "Painting": "#f59e0b",
+            "Illustration": "#3b82f6",
+            "3D Model": "#10b981",
+            "Vector": "#f43f5e",
+            "Other": "#e5e7eb"
+        };
+
+        const totalArtworksForCategory = await getDb().collection('artworks').countDocuments();
+        
+        const categoryData = categoryAggregation.map(cat => ({
+            name: cat._id || "Other",
+            value: totalArtworksForCategory > 0 ? Math.round((cat.count / totalArtworksForCategory) * 100) : 0,
+            color: colors[cat._id] || colors["Other"]
+        }));
+
+        // Generate salesData for the last 6 months
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const currentDate = new Date();
+        const salesData = [];
+        
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+            const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - i + 1, 1);
+            
+            const monthSales = await getDb().collection('transactions').aggregate([
+                { 
+                    $match: { 
+                        status: 'completed',
+                        createdAt: { $gte: d, $lt: nextMonth }
+                    } 
+                },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ]).toArray();
+            
+            salesData.push({
+                name: monthNames[d.getMonth()],
+                sales: monthSales.length > 0 ? monthSales[0].total : 0
+            });
+        }
+
         res.json({
             totalUsers,
             totalArtists,
             artworksSold,
-            totalRevenue
+            totalRevenue,
+            salesData,
+            categoryData
         });
     } catch (error) {
         next(error);
@@ -57,7 +107,7 @@ export const updateUserRole = async (req, res, next) => {
         const { id } = req.params;
         const { role } = req.body;
         await getDb().collection('user').updateOne(
-            { _id: id },
+            { _id: new ObjectId(id) },
             { $set: { role } }
         );
         
@@ -81,7 +131,7 @@ export const updateUserRole = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params;
-        await getDb().collection('user').deleteOne({ _id: id });
+        await getDb().collection('user').deleteOne({ _id: new ObjectId(id) });
         
         await getDb().collection('auditLogs').insertOne({
             adminId: req.user.id,

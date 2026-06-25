@@ -17,7 +17,8 @@ export const createComment = async (req, res) => {
         const userId = req.user.id;
         const userName = req.user.name;
         const userImage = req.user.image;
-        const { artworkId, comment } = req.body;
+        const artworkId = req.params.id || req.body.artworkId;
+        const { comment } = req.body;
 
         // Challenge Requirement: Verify Purchase
         const transaction = await getDb().collection('transactions').findOne({ buyerId: userId, artworkId: artworkId.toString(), status: 'completed' });
