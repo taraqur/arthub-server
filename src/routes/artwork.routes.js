@@ -1,6 +1,15 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const controller = require('../controllers/artwork.controller');
-router.post('/', controller.createArtwork);
+import * as controller from '../controllers/artwork.controller.js';
+import { isArtist } from '../middlewares/auth.middleware.js';
+
+// Public routes
 router.get('/', controller.getArtworks);
-module.exports = router;
+router.get('/:id', controller.getArtworkById);
+
+// Protected artist routes
+router.post('/', isArtist, controller.createArtwork);
+router.patch('/:id', isArtist, controller.updateArtwork);
+router.delete('/:id', isArtist, controller.deleteArtwork);
+
+export default router;

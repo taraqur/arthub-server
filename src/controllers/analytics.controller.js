@@ -1,1 +1,1 @@
-exports.getAdminStats = async (req, res) => { res.json({ totalUsers: 10 }); };
+export const getAdminStats = async (req, res) => { res.json({ totalUsers: 10 }); };
